@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Simulation Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #actions button, #car-list button, #house-list button, #food-list button, #school-list button {
+            margin: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .car-image, .house-image, .food-image {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Life Simulation Game</h1>
+        <p>Age: <span id="age">0</span></p>
+        <p>Money: <span id="money">1000000</span> NGN</p>
+        <p>Health: <span id="health">100</span>%</p>
+        <p>Car: <span id="car">None</span></p>
+        <p>House: <span id="house">None</span></p>
+        <p>Yearly Car Expenses: <span id="car-expenses">0</span> NGN</p>
+        <p>Education Level: <span id="education">None</span></p>
+        <div id="actions">
+            <button onclick="incrementAge()">Increase Age</button>
+            <button onclick="goOutWithFriends()">Go Out with Friends</button>
+            <button onclick="toggleCarList()">Show/Hide Car List</button>
+            <button onclick="toggleHouseList()">Show/Hide House List</button>
+            <button onclick="toggleFoodList()">Show/Hide Food List</button>
+            <button onclick="toggleSchoolList()">Go to School</button>
+            <button onclick="showTotalAssets()">Show Total Assets</button>
+        </div>
+        <div id="car-list" class="hidden">
+            <h2>Purchase a Car</h2>
+            <img src="images/mercedes.jpeg" alt="Mercedes Benz" class="car-image" onclick="buyCar('Mercedes Benz', 500000, 10000)">
+            <img src="path/to/lamborghini.jpg" alt="Lamborghini" class="car-image" onclick="buyCar('Lamborghini', 1500000, 25000)">
+            <img src="path/to/ferrari.jpg" alt="Ferrari" class="car-image" onclick="buyCar('Ferrari', 1200000, 20000)">
+            <img src="path/to/limo.jpg" alt="Limo" class="car-image" onclick="buyCar('Limo', 800000, 15000)">
+        </div>
+        <div id="house-list" class="hidden">
+            <h2>Purchase a House</h2>
+            <img src="path/to/small_house.jpg" alt="Small House" class="house-image" onclick="buyHouse('Small House', 300000)">
+            <img src="path/to/mansion.jpg" alt="Mansion" class="house-image" onclick="buyHouse('Mansion', 2000000)">
+        </div>
+        <div id="food-list" class="hidden">
+            <h2>Purchase Food</h2>
+            <img src="path/to/jollof_rice.jpg" alt="Jollof Rice" class="food-image" onclick="buyFood('Jollof Rice', 5000, 10)">
+            <img src="path/to/pounded_yam.jpg" alt="Pounded Yam" class="food-image" onclick="buyFood('Pounded Yam', 7000, 15)">
+            <img src="path/to/suya.jpg" alt="Suya" class="food-image" onclick="buyFood('Suya', 3000, 5)">
+            <img src="path/to/moimoi.jpg" alt="Moin Moin" class="food-image" onclick="buyFood('Moin Moin', 4000, 8)">
+            <img src="path/to/egusi_soup.jpg" alt="Egusi Soup" class="food-image" onclick="buyFood('Egusi Soup', 6000, 12)">
+            <img src="path/to/akara.jpg" alt="Akara" class="food-image" onclick="buyFood('Akara', 2000, 4)">
+            <img src="path/to/pepper_soup.jpg" alt="Pepper Soup" class="food-image" onclick="buyFood('Pepper Soup', 8000, 18)">
+            <img src="path/to/eba.jpg" alt="Eba" class="food-image" onclick="buyFood('Eba', 5000, 10)">
+            <img src="path/to/ofada_rice.jpg" alt="Ofada Rice" class="food-image" onclick="buyFood('Ofada Rice', 6000, 12)">
+            <img src="path/to/amala.jpg" alt="Amala" class="food-image" onclick="buyFood('Amala', 4500, 9)">
+        </div>
+        <div id="school-list" class="hidden">
+            <button onclick="enterSchool('High School', 50000)">Enter High School</button>
+            <button onclick="enterSchool('BSc', 100000)">Enter BSc Program</button>
+            <button onclick="enterSchool('MSc', 150000)">Enter MSc Program</button>
+            <button onclick="enterSchool('PhD', 200000)">Enter PhD Program</button>
+        </div>
+
+        <div id="class-action" class="hidden">
+            <button onclick="goToClass()">Attend Class</button>
+        </div>
+
+        <div id="graduate-action" class="hidden">
+            <button onclick="graduate()">Graduate</button>
+        </div>
+
+        <div id="bsc-action" class="hidden">
+            <button onclick="enterSchool('BSc', 100000)">Enter BSc Program</button>
+        </div>
+
+        <div id="msc-action" class="hidden">
+            <button onclick="enterSchool('MSc', 150000)">Enter MSc Program</button>
+        </div>
+
+        <div id="phd-action" class="hidden">
+            <button onclick="enterSchool('PhD', 200000)">Enter PhD Program</button>
+        </div>
+
+        <div id="age-action">
+            <button onclick="incrementAge()">Age</button>
+        </div>
+
+        <script>
+            let age = 0;
+            let money = 1000000;
+            let health = 100;
+            let car = "None";
+            let house = "None";
+            let carExpenses = 0;
+            let ownedCars = [];
+            let ownedHouses = [];
+            let canGoToClass = false;
+            let educationLevel = "None";
+            let yearsInSchool = 0;
+            let schoolProgram = '';
+
+            function incrementAge() {
+                age++;
+                health = 20;
+                document.getElementById('age').textContent = age;
+                document.getElementById('health').textContent = health;
+                alert('You are now ' + age + ' years old.');
+                handleYearlyExpenses();
+                canGoToClass = true;  // Reset class attendance for the new year
+                document.getElementById('class-action').classList.add('hidden');  // Hide class button until school fee is paid
+                yearsInSchool++;
+                checkForGraduation();
+            }
+
+            function goOutWithFriends() {
+                let decision = confirm('Do you want to pay N75,000 for drinks?');
+                if (decision) {
+                    if (money >= 75000) {
+                        money -= 75000;
+                        document.getElementById('money').textContent = money;
+                        alert('You paid N75,000 for drinks.');
+                    } else {
+                        alert('You do not have enough money.');
+                    }
+                } else {
+                    alert('You decided not to pay for drinks.');
+                }
+            }
+
+            function buyCar(carName, carPrice, yearlyExpense) {
+                if (money >= carPrice) {
+                    money -= carPrice;
+                    car = carName;
+                    carExpenses = yearlyExpense;
+                    ownedCars.push(carName);
+                    document.getElementById('money').textContent = money;
+                    document.getElementById('car').textContent = car;
+                    document.getElementById('car-expenses').textContent = carExpenses;
+                    alert('You bought a ' + car + ' for ' + carPrice + ' NGN.');
+                } else {
+                    alert('You do not have enough money to buy this car.');
+                }
+            }
+
+            function buyHouse(houseName, housePrice) {
+                if (money >= housePrice) {
+                    money -= housePrice;
+                    house = houseName;
+                    ownedHouses.push(houseName);
+                    document.getElementById('money').textContent = money;
+                    document.getElementById('house').textContent = house;
+                    alert('You bought a ' + house + ' for ' + housePrice + ' NGN.');
+                } else {
+                    alert('You do not have enough money to buy this house.');
+                }
+            }
+
+            function buyFood(foodName, foodPrice, healthGain) {
+                if (money >= foodPrice) {
+                    money -= foodPrice;
+                    health += healthGain;
+                    if (health > 100) health = 100;  // Ensure health doesn't exceed 100%
+                    document.getElementById('money').textContent = money;
+                    document.getElementById('health').textContent = health;
+                    alert('You bought ' + foodName + ' for ' + foodPrice + ' NGN and gained ' + healthGain + '% health.');
+                } else {
+                    alert('You do not have enough money to buy this food.');
+                }
+            }
+
+            function enterSchool(level, cost) {
+                if (money >= cost) {
+                    money -= cost;
+                    educationLevel = level;
+                    yearsInSchool = 0;  // Reset years in school for new program
+                    schoolProgram = level;
+                    document.getElementById('money').textContent = money;
+                    document.getElementById('education').textContent = educationLevel;
+                    alert('You have entered ' + educationLevel + ' and paid ' + cost + ' NGN.');
+                    document.getElementById('school-list').classList.add('hidden');  // Hide school list after entering school
+                    document.getElementById('class-action').classList.remove('hidden');  // Show class button for the first year
+                } else {
+                    alert('You do not have enough money to enter this school.');
+                }
+            }
+
+            function goToClass() {
+                if (canGoToClass) {
+                    alert('You attended class.');
+                    canGoToClass = false;
+                    document.getElementById('class-action').classList.add('hidden');  // Hide class button after attending class
+                    yearsInSchool++;
+                    checkForGraduation();
+                } else {
+                    alert('You have already attended class this year.');
+                }
+            }
+
+            function checkForGraduation() {
+                let graduationYears = {
+                    "High School": 3,
+                    "BSc": 4,
+                    "MSc": 2,
+                    "PhD": 3
+                };
+
+                if (yearsInSchool >= graduationYears[schoolProgram]) {
+                    document.getElementById('graduate-action').classList.remove('hidden');
+                }
+            }
+
+            function graduate() {
+                alert('Congratulations! You have graduated from ' + educationLevel + '!');
+                educationLevel = 'None';
+                schoolProgram = '';
+                document.getElementById('education').textContent = educationLevel;
+                document.getElementById('graduate-action').classList.add('hidden');
+                document.getElementById('class-action').classList.add('hidden');
+            }
+
+            function toggleCarList() {
+                let carList = document.getElementById('car-list');
+                carList.classList.toggle('hidden');
+            }
+
+            function toggleHouseList() {
+                let houseList = document.getElementById('house-list');
+                houseList.classList.toggle('hidden');
+            }
+
+            function toggleFoodList() {
+                let foodList = document.getElementById('food-list');
+                foodList.classList.toggle('hidden');
+            }
+
+            function toggleSchoolList() {
+                let schoolList = document.getElementById('school-list');
+                schoolList.classList.toggle('hidden');
+            }
+
+            function showTotalAssets() {
+                let totalAssets = money + ownedHouses.reduce((acc, house) => acc + house.price, 0) + ownedCars.reduce((acc, car) => acc + car.price, 0);
+                alert('Your total assets are worth ' + totalAssets + ' NGN.');
+            }
+
+            function handleYearlyExpenses() {
+                if (carExpenses > 0) {
+                    money -= carExpenses;
+                    document.getElementById('money').textContent = money;
+                    alert('You paid ' + carExpenses + ' NGN in car expenses this year.');
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>
